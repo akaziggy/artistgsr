@@ -92,30 +92,15 @@ const countryOptions = [
 ];
 
 const Filters = ({ searchParams, setSearchParams }) => {
-  const handleExcludeGenre = (option) => {
-    if (!option || searchParams.excludedGenres.includes(option.value)) return;
-    setSearchParams({
-      ...searchParams,
-      excludedGenres: [...searchParams.excludedGenres, option.value],
-    });
-  };
-
-  const handleRemoveExcludedGenre = (genre) => {
-    setSearchParams({
-      ...searchParams,
-      excludedGenres: searchParams.excludedGenres.filter((g) => g !== genre),
-    });
-  };
   return (
       <div className="filter-wrapper">
-        {/* Last Guess */}
         {/*<div className="filter-item">*/}
         {/*  <label>Last Guess</label>*/}
         {/*  <input*/}
         {/*      type="text"*/}
         {/*      placeholder="Enter artist name"*/}
         {/*      value={searchParams.lastGuess}*/}
-        {/*      onChange={(e) => setSearchParams({ ...searchParams, lastGuess: e.target.value })}*/}
+        {/*      onChange={(e) => setSearchParams({...searchParams, lastGuess: e.target.value})}*/}
         {/*  />*/}
         {/*</div>*/}
 
@@ -131,7 +116,9 @@ const Filters = ({ searchParams, setSearchParams }) => {
                     searchParams.debutMode === "range" ? "#ad9730" : "#2b2b2b",
                 color: "white",
               }}
+
           />
+
           <div className="toggle-buttons">
             <ToggleButton
                 label={<img src={exactIcon} alt="Exact Mode" className="button-icon" />}
