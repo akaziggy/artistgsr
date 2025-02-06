@@ -7,8 +7,9 @@ const ToggleButton = ({ label, isActive, onClick, color }) => {
           className="toggle-button"
           style={{
             backgroundColor: isActive ? color : "#555",
+            textAlign: "center",
             border: "none",
-            padding: "8px",
+            padding: "8px 5px",
             borderRadius: "8px",
             cursor: "pointer",
             transition: "background-color 0.3s ease",

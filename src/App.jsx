@@ -1,10 +1,10 @@
-// App.jsx - Optimized Filtering Logic, useMemo, and Improved Performance
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "./components/Header";
 import Filters from "./components/Filters";
 import Results from "./components/Results";
 import "./styles/App.css";
 import database from "./data/database.json";
+
 
 const continentMap = {
   us: "north america",
@@ -71,29 +71,96 @@ const App = () => {
   const [results, setResults] = useState([]);
   const [isFirstSearch, setIsFirstSearch] = useState(true);
 
-  const filteredResults = useMemo(() => {
-    return database.filter((artist) => {
+  const searchDatabase = () => {
+    const filteredResults = database.filter((artist) => {
       const artistCountry = artist.COUNTRY.toLowerCase();
       const userCountry = searchParams.country?.toLowerCase() || "";
       const userContinent = continentMap[userCountry];
       const artistContinent = continentMap[artistCountry];
+      const genreMatch = searchParams.genre
+          ? artist.GENRE.toLowerCase() === searchParams.genre.toLowerCase()
+          : true;
 
-      return [
-        !searchParams.genre || artist.GENRE.toLowerCase() === searchParams.genre.toLowerCase(),
-        !searchParams.gender || artist.GENDER === searchParams.gender,
-        !searchParams.members || artist.MEMBERS === searchParams.members,
-        !searchParams.debut || (searchParams.debutMode === "exact" && artist.DEBUT.toString() === searchParams.debut),
-        !searchParams.popularity || (searchParams.popularityMode === "exact" && artist.POPULARITY.toString() === searchParams.popularity),
-        searchParams.countryMode === "exact" ? artistCountry === userCountry : true,
-        searchParams.countryMode === "close" ? artistContinent === userContinent && artistCountry !== userCountry : true,
-        searchParams.countryMode === "exclude" ? artistCountry !== userCountry : true,
-      ].every(Boolean);
+      let countryMatch = true;
+      if (searchParams.country) {
+        if (searchParams.countryMode === "exact") {
+          countryMatch = artistCountry === userCountry;
+        } else if (searchParams.countryMode === "close") {
+          countryMatch = artistContinent === userContinent && artistCountry !== userCountry;
+        } else if (searchParams.countryMode === "exclude") {
+          countryMatch = artistCountry !== userCountry;
+        }
+      }
+
+      let debutMatch = true;
+      if (searchParams.debut) {
+        if (searchParams.debutMode === "exact") {
+          debutMatch = artist.DEBUT.toString() === searchParams.debut;
+        } else if (searchParams.debutMode === "range") {
+          debutMatch = Math.abs(artist.DEBUT - parseInt(searchParams.debut)) <= 5;
+        } else if (searchParams.debutMode === "lower") {
+          debutMatch = artist.DEBUT >= searchParams.lowerBound && artist.DEBUT < parseInt(searchParams.debut);
+        } else if (searchParams.debutMode === "upper") {
+          debutMatch = artist.DEBUT > parseInt(searchParams.debut) && artist.DEBUT <= searchParams.upperBound;
+        }
+      }
+
+      let popularityMatch = true;
+      if (searchParams.popularity) {
+        if (searchParams.popularityMode === "exact") {
+          popularityMatch = artist.POPULARITY.toString() === searchParams.popularity;
+        } else if (searchParams.popularityMode === "range") {
+          popularityMatch = Math.abs(artist.POPULARITY - parseInt(searchParams.popularity)) <= 50;
+        } else if (searchParams.popularityMode === "lower") {
+          popularityMatch = artist.POPULARITY >= parseInt(searchParams.popularity) && artist.POPULARITY <= searchParams.popularityUpper;
+        } else if (searchParams.popularityMode === "upper") {
+          popularityMatch = artist.POPULARITY >= searchParams.popularityLower && artist.POPULARITY <= parseInt(searchParams.popularity);
+        }
+      }
+
+      return (
+          debutMatch &&
+          popularityMatch &&
+          (!searchParams.members || artist.MEMBERS === searchParams.members) &&
+          (!searchParams.gender || artist.GENDER === searchParams.gender) &&
+          (!searchParams.genre || artist.GENRE.toLowerCase() === searchParams.genre.toLowerCase()) &&
+          countryMatch
+      );
     });
+
+    setResults(filteredResults);
+  };
+
+  useEffect(() => {
+    if (!isFirstSearch) {
+      searchDatabase();
+    }
   }, [searchParams]);
 
   const handleSearchClick = () => {
     setIsFirstSearch(false);
-    setResults(filteredResults);
+    searchDatabase();
+  };
+
+  const clearFilters = () => {
+    setSearchParams({
+      lastGuess: "",
+      debut: "",
+      popularity: "",
+      members: "",
+      gender: "",
+      country: "",
+      genre: "",
+      debutMode: "default",
+      lowerBound: 1900,
+      upperBound: 2025,
+      popularityMode: "default",
+      popularityLower: 1,
+      popularityUpper: 204,
+      countryMode: "exact",
+    });
+    setResults([]);
+    setIsFirstSearch(true);
   };
 
   return (
@@ -101,11 +168,16 @@ const App = () => {
         <Header />
         <Filters searchParams={searchParams} setSearchParams={setSearchParams} />
         <div className="action-buttons">
-          <button className="search-button" onClick={handleSearchClick}>Search</button>
-          <button className="clear-button" onClick={() => setSearchParams({ /* default state */ })}>Clear</button>
+          <button className="search-button" onClick={handleSearchClick}>
+            Search
+          </button>
+          <button className="clear-button" onClick={clearFilters}>
+            Clear
+          </button>
         </div>
         <Results results={results} searchParams={searchParams} />
       </div>
   );
 };
+
 export default App;

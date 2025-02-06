@@ -33,31 +33,30 @@ const Results = ({results, searchParams}) => {
         {results.length > 0 ? (
             results.map((artist, index) => (
                 <div key={index} className="result-card">
-                  <img
-                      src={artist.ImageURL || "/placeholder.jpg"}
-                      alt={artist.ARTIST}
-                      className="result-image"
-                      loading="lazy"
-                  />
+                  <img src={artist.ImageURL || "/placeholder.jpg"} alt={artist.ARTIST} className="result-image"/>
                   <h3 className="result-name">{artist.ARTIST}</h3>
                   <div className="result-details">
-                    <div className="detail-item">
+                    <div className="detail-item" style={getHighlightStyle("DEBUT", artist.DEBUT)}>
                       <span className="detail-label">Debut:</span>
                       <span className="detail-value">{artist.DEBUT}</span>
                     </div>
-                    <div className="detail-item">
+                    <div className="detail-item" style={getHighlightStyle("POPULARITY", artist.POPULARITY)}>
                       <span className="detail-label">Popularity:</span>
                       <span className="detail-value">#{artist.POPULARITY}</span>
                     </div>
-                    <div className="detail-item">
+                    <div className="detail-item" style={getHighlightStyle("MEMBERS", artist.MEMBERS)}>
+                      <span className="detail-label">Members:</span>
+                      <span className="detail-value">{artist.MEMBERS}</span>
+                    </div>
+                    <div className="detail-item" style={getHighlightStyle("GENRE", artist.GENRE)}>
                       <span className="detail-label">Genre:</span>
                       <span className="detail-value">{artist.GENRE}</span>
                     </div>
-                    <div className="detail-item">
+                    <div className="detail-item" style={getHighlightStyle("COUNTRY", artist.COUNTRY)}>
                       <span className="detail-label">Country:</span>
                       <span className="detail-value">{artist.COUNTRY}</span>
                     </div>
-                    <div className="detail-item">
+                    <div className="detail-item" style={getHighlightStyle("GENDER", artist.GENDER)}>
                       <span className="detail-label">Gender:</span>
                       <span className="detail-value">{artist.GENDER}</span>
                     </div>
