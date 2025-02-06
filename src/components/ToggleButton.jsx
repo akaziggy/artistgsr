@@ -1,4 +1,3 @@
-// ToggleButton.jsx - Improved Accessibility and Styling
 import React from "react";
 
 const ToggleButton = ({ label, isActive, onClick, color }) => {
